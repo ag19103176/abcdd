@@ -5,50 +5,18 @@ import Loader from "./Components/Loader/loader.js";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import "./App.css";
 import Select from "react-select";
+import customStyles from "./Components/AppComponents/customStyle.js";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import ChartCard from "./Components/AppComponents/ChartCard.js";
-import sourceIcon from "./assets/source.png";
 import numeric from "./assets/numeric.png";
-import graphIcon from "./assets/graph.png";
-import customer from "./assets/customer.png";
-import dashlet from "./assets/dashlet.png";
-import refreshIcon from "./assets/refresh.png";
-import refreshWhite from "./assets/refreshWhite.png";
-import bar from "./assets/bar.png";
-import reorderIcon from "./assets/reorder.png";
-import pieBlack from "./assets/pieBlack.png";
-import tick from "./assets/tick.png";
-import tickRed from "./assets/tickRed.png";
 import addIcon from "./assets/add.png";
-import numericBlack from "./assets/numericBlack.png";
-import lineBlack from "./assets/lineBlack.png";
-import sum from "./assets/sum.png";
-import invoiceBlack from "./assets/invoiceBlack.png";
-import avg from "./assets/avg.png";
-import ticket from "./assets/ticket.png";
+import MainBox from "./Components/AppComponents/mainBoxModal.js";
+import ModalComponent from "./Components/AppComponents/dashletModal.js";
 const mongoose = require("mongoose");
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 function App() {
-  const sources = [
-    { name: "customers" },
-    { name: "invoices" },
-    { name: "ticket" },
-  ];
-  const basic = [
-    { name: "Graph", identificationId: 1 },
-    { name: "Numeric", identificationId: 2 },
-  ];
-  const structures = [
-    { name: "Pie Graph", id: 1 },
-    { name: "Bar Graph", id: 2 },
-    { name: "Line Graph", id: 3 },
-  ];
-  const abc = [
-    { name: "Sum", idc: 1 },
-    { name: "Average", idc: 2 },
-  ];
   const xyz = [
     "root_parent_id",
     "parent_id",
@@ -494,19 +462,6 @@ function App() {
     }
   };
 
-  const generateLayout = (graphs) => {
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-
-    graphs.forEach((graph) => {
-      if (graph.layout) {
-        maxX = Math.max(maxX, graph.layout.x);
-        maxY = Math.max(maxY, graph.layout.y);
-      }
-    });
-
-    return { x: maxX, y: maxY, h: 5.7, w: 4 };
-  };
   const handleLayout = (graphs) => {
     return graphs.map((graph, index) => ({
       i: graph.id?.toString() || index.toString(),
@@ -598,382 +553,43 @@ function App() {
     setDash(e.target.value);
   };
   const options = xyz.map((option) => ({ value: option, label: option }));
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isFocused ? "inital" : "initial",
-      color: state.isFocused ? "white" : "initial",
-      "&:hover": {
-        backgroundColor: state.isFocused ? "inital" : "initial",
-        color: state.isFocused ? "white" : "initial",
-      },
-    }),
-    menu: (provided) => ({
-      ...provided,
-    }),
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isSelected ? "red" : "initial",
-      color: state.isSelected ? "white" : "initial",
-      "&:hover": {
-        backgroundColor: state.isFocused ? "lightgrey" : "initial",
-        color: state.isSelected ? "white" : "initial",
-      },
-    }),
-    singleValue: (provided) => ({
-      ...provided,
-      color: "initial",
-    }),
-  };
 
   return (
     <div className="App">
       {loading && <Loader />}
       <div className="main-box">
-        <div className="row">
-          <div className="left-div">
-            <div>
-              <button
-                onClick={handleToggleDragDrop}
-                className={`reorder-button ${isDraggable ? "active" : ""}`}
-              >
-                <img
-                  src={reorderIcon}
-                  alt="Reorder Icon"
-                  className={`reorder-icon ${isDraggable ? "icon-active" : ""}`}
-                />
-                Reorder Dashlet
-              </button>
-            </div>
-            <button className="add-button" onClick={handleAddButton}>
-              + ADD GRAPH
-            </button>
-          </div>
-          <div className="right-div">
-            <button
-              className={`refresh-btn ${refreshToggle ? "active" : ""}`}
-              onClick={() =>
-                setRefreshToggle((prev) => {
-                  return !prev;
-                })
-              }
-            >
-              {refresh === 0 ? (
-                <img
-                  src={refreshIcon}
-                  alt="Refresh Icon"
-                  className="refresh-icon"
-                />
-              ) : (
-                <div className={refresh === 0 ? "" : "timer"}>
-                  <p className="refresh-p">{refresh}</p>
-                  <img
-                    src={refreshWhite}
-                    // alt="Refresh Icon"
-                    className="refreshWhite-icon"
-                  />
-                </div>
-              )}
-            </button>
-            {refreshToggle && (
-              <div className="popup">
-                <label>Auto Refresh</label>
-                <div
-                  className={`popup-option ${refresh === 0 ? "active" : ""}`}
-                  onClick={() => handleRefreshClick(0)}
-                >
-                  <img
-                    src={refresh === 0 ? { tickRed } : { tick }}
-                    className="tick-icon"
-                  />
-                  Off
-                </div>
-                <div
-                  className={`popup-option ${refresh === 5 ? "active" : ""}`}
-                  onClick={() => handleRefreshClick(5)}
-                >
-                  <img
-                    src={refresh === 5 ? { tickRed } : { tick }}
-                    className="tick-icon"
-                  />
-                  5 minutes
-                </div>
-                <div
-                  className={`popup-option ${refresh === 10 ? "active" : ""}`}
-                  onClick={() => handleRefreshClick(10)}
-                >
-                  <img
-                    src={refresh === 10 ? { tickRed } : { tick }}
-                    className="tick-icon"
-                  />
-                  10 minutes
-                </div>
-                <div
-                  className={`popup-option ${refresh === 15 ? "active" : ""}`}
-                  onClick={() => handleRefreshClick(15)}
-                >
-                  <img
-                    src={refresh === 15 ? { tickRed } : { tick }}
-                    className="tick-icon"
-                  />
-                  15 minutes
-                </div>
-              </div>
-            )}
-
-            <div className="custom">
-              <p>Custom Dashboard</p>
-              <label className="switch">
-                <input type="checkbox" />
-                <span className="slider round"></span>
-              </label>
-            </div>
-          </div>
-        </div>
+        <MainBox
+          handleAddButton={handleAddButton}
+          handleRefreshClick={handleRefreshClick}
+          refresh={refresh}
+          refreshToggle={refreshToggle}
+          setRefreshToggle={setRefreshToggle}
+          handleToggleDragDrop={handleToggleDragDrop}
+          isDraggable={isDraggable}
+        />
 
         {addButton && showModal && (
           <div className="box">
             <div className="modal-container">
               <div className="modal-content">
-                <div className="dash-name">
-                  <div>
-                    <label className="select-heading">New Dashlet</label>
-                  </div>
-
-                  <div className="buttons-right">
-                    <div className="modal-button-container">
-                      <button className="cancel" onClick={handleCancel}>
-                        Cancel
-                      </button>
-                      <button
-                        className="generate-button"
-                        onClick={
-                          identify === "1"
-                            ? graphEdit
-                              ? handleGenerateEditGraph
-                              : handleGenerateGraphClick
-                            : graphEdit
-                            ? handleGenerateEditCount
-                            : handleGenerateCount
-                        }
-                      >
-                        {graphEdit ? "Edit" : "Create"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="select-container">
-                  <div className="label-container">
-                    <img
-                      src={dashlet}
-                      alt="Source Icon"
-                      className="source-icon"
-                    />
-
-                    <label className="select-heading">Dashlet Name</label>
-                    <div>
-                      <input
-                        style={{
-                          width: "100%",
-                          height: "35px",
-                          padding: "3px",
-                        }}
-                        placeholder="Enter Dashlet Title"
-                        value={dash}
-                        onChange={handleDashlet}
-                      ></input>
-                    </div>
-                  </div>
-                </div>
-                <div className="select-container">
-                  <div className="label-container">
-                    <img
-                      src={sourceIcon}
-                      alt="Source Icon"
-                      className="source-icon"
-                    />
-                    <label htmlFor="ddlOptions1" className="select-heading">
-                      Select Source
-                    </label>
-                  </div>
-                  <div className="options-container">
-                    {sources.map((option, index) => {
-                      let icon;
-                      if (option.name === "customers") {
-                        icon = customer;
-                      } else if (option.name === "invoices") {
-                        icon = invoiceBlack;
-                      } else {
-                        icon = ticket;
-                      }
-
-                      return (
-                        <button
-                          key={index}
-                          className={`option-button ${
-                            option.name === selectedSource ? "selected" : ""
-                          }`}
-                          onClick={() => handleSourceChange(option.name)}
-                          style={{ marginRight: "10px" }}
-                        >
-                          <img
-                            src={icon}
-                            alt={`${option.name} Icon`}
-                            className={`main-source-icon ${
-                              option.name === selectedSource ? "selected" : ""
-                            }`}
-                          />
-                          {option.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div className="select-container">
-                  <div className="label-container">
-                    <img
-                      src={sourceIcon}
-                      alt="Source Icon"
-                      className="source-icon"
-                    />
-                    <label htmlFor="ddlOptions3" className="select-heading">
-                      Select Types
-                    </label>
-                  </div>
-                  <div className="options-container">
-                    {basic.map((option, index) => {
-                      let icon;
-                      if (option.name === "Graph") {
-                        icon = customer;
-                      } else if (option.name === "Numeric") {
-                        icon = numericBlack;
-                      } else {
-                        icon = sourceIcon;
-                      }
-
-                      return (
-                        <button
-                          key={index}
-                          className={`option-button ${
-                            option.identificationId === Number(identify)
-                              ? "selected"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            selectIdentify(option.identificationId)
-                          }
-                          style={{ marginRight: "10px" }}
-                        >
-                          <img
-                            src={icon}
-                            alt={`${option.name} Icon`}
-                            className={`main-source-icon ${
-                              option.identificationId === Number(identify)
-                                ? "selected"
-                                : ""
-                            }`}
-                          />
-
-                          {option.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                {identify === "1" && (
-                  <div className="select-container">
-                    <div className="label-container">
-                      <img
-                        src={graphIcon}
-                        alt="Source Icon"
-                        className="source-icon"
-                      />
-                      <label htmlFor="ddlOptions2" className="select-heading">
-                        Select Visual
-                      </label>
-                    </div>
-                    <div className="options-container">
-                      {structures.map((option, index) => {
-                        let icon;
-                        console.log(option.id);
-                        if (option.id === 1) {
-                          icon = pieBlack;
-                        } else if (option.id === 2) {
-                          icon = bar;
-                        } else {
-                          icon = lineBlack;
-                        }
-
-                        return (
-                          <button
-                            key={index}
-                            className={`option-button ${
-                              option.id === Number(type) ? "selected" : ""
-                            }`}
-                            onClick={() => selectGraph(option.id)}
-                            style={{ marginRight: "10px" }}
-                          >
-                            <img
-                              src={icon}
-                              alt={`${option.name} Icon`}
-                              className={`main-source-icon ${
-                                option.id === Number(type) ? "selected" : ""
-                              }`}
-                            />
-                            {option.name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-                {identify === "2" && (
-                  <div className="select-container">
-                    <div className="label-container">
-                      <img
-                        src={graphIcon}
-                        alt="Source Icon"
-                        className="source-icon"
-                      />
-                      <label htmlFor="ddlOptions2" className="select-heading">
-                        Select Visual
-                      </label>
-                    </div>
-                    <div className="options-container">
-                      {abc.map((option, index) => {
-                        let icon;
-                        if (option.idc === 1) {
-                          icon = sum;
-                        } else if (option.idc === 2) {
-                          icon = avg;
-                        } else {
-                          icon = lineBlack;
-                        }
-
-                        return (
-                          <button
-                            key={index}
-                            className={`option-button ${
-                              option.idc === Number(num) ? "selected" : ""
-                            }`}
-                            onClick={() => selectNumeric(option.idc)}
-                            style={{ marginRight: "10px" }}
-                          >
-                            <img
-                              src={icon}
-                              alt={`${option.name} Icon`}
-                              className={`main-source-icon ${
-                                option.idc === Number(num) ? "selected" : ""
-                              }`}
-                            />
-                            {option.name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                <ModalComponent
+                  identify={identify}
+                  graphEdit={graphEdit}
+                  handleCancel={handleCancel}
+                  handleGenerateEditGraph={handleGenerateEditGraph}
+                  handleGenerateGraphClick={handleGenerateGraphClick}
+                  handleGenerateEditCount={handleGenerateEditCount}
+                  handleGenerateCount={handleGenerateCount}
+                  dash={dash}
+                  handleDashlet={handleDashlet}
+                  selectedSource={selectedSource}
+                  handleSourceChange={handleSourceChange}
+                  selectIdentify={selectIdentify}
+                  type={type}
+                  num={num}
+                  selectGraph={selectGraph}
+                  selectNumeric={selectNumeric}
+                />
 
                 <div>
                   {["customers", "ticket", "invoices"].map(

@@ -10,15 +10,12 @@
 }
 
 .main-box {
+
   background-color: #E7E7E7;
   padding: 20px;
   display: flex;
   border-radius: 8px;
   box-shadow: 0px 7px 10px rgba(0, 0, 0, 0.1);
-}
-
-.box {
-  margin-bottom: 20px;
 }
 
 .select-class {
@@ -82,6 +79,7 @@
   left: 0;
   right: 0;
   bottom: 0;
+  
 }
 
 .modal-content {
