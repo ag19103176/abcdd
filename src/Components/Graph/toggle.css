@@ -1,0 +1,244 @@
+.display-section {
+  margin-top: 20px;
+}
+
+.display-section div {
+  margin-bottom: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.legend {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.label {
+  align-self: center;
+}
+.displayy{
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 10px; 
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked+.slider {
+  background-color: #EE5566;
+}
+
+input:focus+.slider {
+  box-shadow: 0 0 1px #EE5566;
+}
+
+input:checked+.slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+.graphPanda {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.chart-card {
+  border-radius: 10px;
+  box-shadow: 4px 6px 8px 10px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  display: inline-block;
+}
+.add-card{
+    border-radius: 10px;
+      box-shadow: 4px 6px 8px 10px rgba(0, 0, 0, 0.1);
+      background-color: #fff;
+      display: inline-block;
+}
+.chart-header {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.chart-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90%;
+  width: 100%;
+}
+
+.chart-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60%;
+  width: 70%;
+  padding: 80px;
+  margin: 10px;
+}
+
+.edit {
+  background-color: gray;
+  color: #fff;
+  margin-left: 2px;
+  border: none;
+  border-radius: 4px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.Btn {
+  display: flex;
+  justify-content: right;
+  width: 98%;
+  gap: 3px;
+  height: 45px;
+  align-items: center;
+      /* margin-top: 9px; */
+      margin-left: 8px
+}
+
+.black {
+  background-color: black;
+  width: 100%;
+}
+
+.custom-legend {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: -32px;
+  padding: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.legend-item:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  border-radius: 50%;
+}
+
+.legend-text {
+  font-size: 14px;
+}
+
+.pagination-controls {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.pagination-controls button {
+  background-color: #EE5566;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pagination-controls button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: #EE5566;
+}
+.radio-group {
+  display: inline-flex;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 2px solid transparent;
+}
+
+.radio-input {
+  display: none;
+}
+
+.radio-label {
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: white;
+  color: black;
+  transition: border-color 0.3s, color 0.3s;
+  border: 2px solid #ccc;
+  border-right: none;
+  border-radius: 0;
+}
+
+.radio-label:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.radio-label:last-child {
+  border-right: 2px solid #ccc;
+  border-radius: 0 8px 8px 0;
+}
+
+.radio-label.active {
+  color: black;
+  border-color: red;
+}
+
+.radio-label.active+.radio-label {
+  border-left-color: red;
+}

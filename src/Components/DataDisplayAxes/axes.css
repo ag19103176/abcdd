@@ -1,0 +1,27 @@
+Container for the entire component
+.axes-container {
+    padding: 10px;
+    /* background-color: #f5f5f5;
+    border-radius: 5px;
+    margin: 10px 0; */
+}
+.showLabel{
+    display: flex;
+    gap: 10px;
+}
+/* Label styles */
+.axes-container label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Subsection for axis settings */
+.axis-section {
+    margin-bottom: 20px;
+}
+
+/* Radio button container */
+.radio-container {
+    display: flex;
+    /* gap: 10px; */
+}
