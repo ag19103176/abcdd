@@ -49,7 +49,7 @@ const DataDisplayComponent = ({
   const [mode, setMode] = useState("data");
   const [dimensions, setDimensions] = useState([]);
   const [measures, setMeasures] = useState([]);
-
+  const [meas, setMeas] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -72,6 +72,8 @@ const DataDisplayComponent = ({
           params: { chartSource: selectedSource },
         });
         // console.log(measRes.data);
+        setMeas(measRes.data);
+
         setDimensions(keys);
         setMeasures(measRes.data);
       } catch (error) {
@@ -88,7 +90,7 @@ const DataDisplayComponent = ({
 
   const handleDimensionChange = (value) => {
     handleDimension(value);
-    const meas = measures;
+    console.log(meas);
     const measFilter = meas.filter((key) => key !== value);
     setMeasures(measFilter);
   };
