@@ -85,7 +85,7 @@ router.post("/insertInvoiceTable", async (req, res) => {
 
 router.get("/getAllData", async (req, res) => {
   const { chartSource } = req.query;
-  console.log("Table name:", chartSource);
+  // console.log("Table name:", chartSource);
   try {
     if (!chartSource || !schemas[chartSource]) {
       console.error("Invalid table name:", chartSource);
@@ -538,7 +538,37 @@ router.get("/getGraph", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
+router.get("/getMeasure", async (req, res) => {
+  const { chartSource } = req.query;
+  // console.log("Table name:", chartSource);
+  try {
+    if (!chartSource || !schemas[chartSource]) {
+      console.error("Invalid table name:", chartSource);
+      return res.status(400).send("Invalid table name");
+    }
+    let data;
+    if (chartSource === "customers") {
+      data = [
+        "root_parent_id",
+        "parent_id",
+        "deleted_at",
+        "ready_for_sync",
+        "created_user_id",
+        "updated_user_id",
+        "is_active",
+        "is_deleted",
+        "skip_level",
+        "is_prospect",
+      ];
+    } else if (chartSource === "invoices") {
+      data = ["Apoorva", "babyPanda", "riyaa", "panda", "baby"];
+    }
+    res.send(data);
+  } catch (err) {
+    console.error("Error fetching data:", err.message);
+    res.status(500).send("Error fetching data");
+  }
+});
 router.patch("/deleteGraph/:id", async (req, res) => {
   try {
     const graphId = req.body;

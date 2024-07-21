@@ -59,18 +59,7 @@ const DataDisplayComponent = ({
         const fItem = response.data[0];
         const keys = Object.keys(fItem);
         const mens = [];
-        const meas = [
-          "root_parent_id",
-          "parent_id",
-          "deleted_at",
-          "ready_for_sync",
-          "created_user_id",
-          "updated_user_id",
-          "is_active",
-          "is_deleted",
-          "skip_level",
-          "is_prospect",
-        ];
+
         keys.forEach((key) => {
           const value = fItem[key];
           if (typeof value === "number" || typeof value === "boolean") {
@@ -79,8 +68,12 @@ const DataDisplayComponent = ({
             mens.push(key);
           }
         });
+        var measRes = await axios.get("http://localhost:8000/api/getMeasure", {
+          params: { chartSource: selectedSource },
+        });
+        // console.log(measRes.data);
         setDimensions(keys);
-        setMeasures(meas);
+        setMeasures(measRes.data);
       } catch (error) {
         console.error("Error fetching columns: ", error);
       }
@@ -95,6 +88,9 @@ const DataDisplayComponent = ({
 
   const handleDimensionChange = (value) => {
     handleDimension(value);
+    const meas = measures;
+    const measFilter = meas.filter((key) => key !== value);
+    setMeasures(measFilter);
   };
 
   const handleMeasureChange = (value) => {

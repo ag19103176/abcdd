@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import DataDisplayComponent from "./Components/DataDisplayAxes/CommonDisplay.js";
 import Loader from "./Components/Loader/loader.js";
@@ -62,17 +62,23 @@ function App() {
   const [refreshToggle, setRefreshToggle] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [dash, setDash] = useState("");
+  const refreshIntervalRef = useRef(null);
 
-  var refreshInterval;
   const handleRefreshClick = (val) => {
+    console.log("dfs", val);
     setRefreshToggle(!refreshToggle);
     setRefresh(val);
-    if (val === 0) clearInterval(refreshInterval);
-    else
-      refreshInterval = setInterval(() => {
-        setGraph(!graph);
+
+    if (refreshIntervalRef.current) {
+      clearInterval(refreshIntervalRef.current);
+      refreshIntervalRef.current = null;
+    }
+
+    if (val > 0) {
+      refreshIntervalRef.current = setInterval(() => {
+        setGraph((prevGraph) => !prevGraph);
       }, val * 1000);
-    console.log("dfs", val);
+    }
   };
 
   useEffect(() => {
@@ -327,7 +333,7 @@ function App() {
           field: dim,
         },
       };
-      console.log("generate", requestData);
+      // console.log("generate", requestData);
       await axios.patch("http://localhost:8000/api/saveGraph", requestData);
       setGraph(!graph);
       setNum("");
