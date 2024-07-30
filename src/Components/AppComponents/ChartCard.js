@@ -5,7 +5,13 @@ import ChartActions from "./ChartActions";
 import ChartDisplay from "./ChartDisplay";
 import "../Graph/toggle.css";
 
-const ChartCard = ({ d, handleEdit, handleEditCount, handleDelete }) => {
+const ChartCard = ({
+  d,
+  handleEdit,
+  handleEditCount,
+  setShowModal,
+  handleDelete,
+}) => {
   return (
     <>
       <div className="black">
@@ -14,6 +20,7 @@ const ChartCard = ({ d, handleEdit, handleEditCount, handleDelete }) => {
           <ChartActions
             d={d}
             handleEdit={handleEdit}
+            setShowModal={setShowModal}
             handleEditCount={handleEditCount}
             handleDelete={handleDelete}
           />

@@ -490,6 +490,7 @@ function App() {
         w: item.w,
         h: item.h,
       }));
+      console.log("updatedGraphs", updatedGraphs);
       const res = await axios.patch(
         `http://localhost:8000/api/updateGraphPositions/${objid}`,
         updatedGraphs
@@ -682,24 +683,6 @@ function App() {
         isDraggable={isDraggable}
         breakpoints={{ lg: 100 }}
       >
-        <div
-          key="static-item"
-          className="add-card"
-          data-grid={{ x: 0, y: 0, w: 4, h: 5.7 }}
-        >
-          <div className="black-strip">
-            <span className="add-black">
-              <img src={numeric} alt="Pie Chart Icon" className="source-icon" />
-              New Dashlet
-            </span>
-          </div>
-          <div className="add-btn-container">
-            <a className="add-btn" onClick={handleAddButton}>
-              <img src={addIcon} className="add-icon" />
-            </a>
-          </div>
-          <div className="p">Track Stats Important To Your Business</div>
-        </div>
         {layout &&
           displayGraph.map((d, index) => (
             <div
@@ -708,16 +691,40 @@ function App() {
               data-grid={handleLayout(displayGraph)[index]}
               onClick={(e) => e.stopPropagation()}
             >
-              <ChartCard
-                key={d._id}
-                d={{ ...d, index }}
-                layout={layout}
-                displayGraph={displayGraph}
-                handleLayout={handleLayout}
-                handleEdit={handleEdit}
-                handleEditCount={handleEditCount}
-                handleDelete={handleDelete}
-              />
+              {index === 0 ? (
+                <>
+                  <div className="black-strip">
+                    <span className="add-black">
+                      <img
+                        src={numeric}
+                        alt="Pie Chart Icon"
+                        className="source-icon"
+                      />
+                      New Dashlet
+                    </span>
+                  </div>
+                  <div className="add-btn-container">
+                    <a className="add-btn" onClick={handleAddButton}>
+                      <img src={addIcon} className="add-icon" />
+                    </a>
+                  </div>
+                  <div className="p">
+                    Track Stats Important To Your Business
+                  </div>
+                </>
+              ) : (
+                <ChartCard
+                  key={d._id}
+                  d={{ ...d, index }}
+                  layout={layout}
+                  displayGraph={displayGraph}
+                  setShowModal={showModal}
+                  handleLayout={handleLayout}
+                  handleEdit={handleEdit}
+                  handleEditCount={handleEditCount}
+                  handleDelete={handleDelete}
+                />
+              )}
             </div>
           ))}
       </ResponsiveReactGridLayout>

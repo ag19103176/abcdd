@@ -130,248 +130,314 @@ router.get("/getGroup", async (req, res) => {
     if (!chartSource || !field1 || !field2) {
       return res.status(400).send("Table name and fields are required.");
     }
+    let pipeline = [];
+    console.log(typeof field2);
+    if (typeof field2 === "number") {
+      pipeline = [
+        {
+          $match: {
+            [field2]: {
+              $ne: null,
+            },
+          },
+        },
 
-    // Perform aggregation
-    const response = await schemas[chartSource].aggregate([
-      {
-        $match: {
-          [field2]: { $ne: null }, // Filter out documents where field2 is null
-        },
-      },
-      {
-        $addFields: {
-          numericFieldStr: {
-            $regexFind: {
-              input: `$${field2}`,
-              regex: /\d+/,
+        {
+          $set: {
+            count_string: {
+              $toString: `$${field2}`,
             },
           },
         },
-      },
-      {
-        $addFields: {
-          numericField: {
-            $cond: {
-              if: { $ne: ["$numericFieldStr.match", null] },
-              then: { $toDouble: "$numericFieldStr.match" },
-              else: null,
+        {
+          $set: {
+            len: {
+              $strLenCP: "$count_string",
+            },
+            label: "$name",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            max_len: {
+              $max: "$len",
+            },
+            docs: {
+              $push: "$$ROOT",
+            },
+            total: {
+              $sum: `$${field2}`,
             },
           },
         },
-      },
-      {
-        $match: {
-          numericField: { $ne: null }, // Filter out documents where numericField is null
-        },
-      },
-      {
-        $group: {
-          _id: `$${field1}`,
-          data: {
-            $push: {
-              value: "$numericField",
-              length: { $strLenCP: { $toString: "$numericField" } }, // Calculate length of numericField
-            },
+        {
+          $set: {
+            "docs.max_len": "$max_len",
           },
         },
-      },
-      {
-        $project: {
-          _id: 0,
-          label: `$_id`,
-          data: 1,
-        },
-      },
-      {
-        $unwind: "$data",
-      },
-      {
-        $group: {
-          _id: {
-            label: "$label",
-            length: "$data.length",
-            value: "$data.value",
-          },
-          count: { $sum: 1 },
-          totalValue: { $sum: "$data.value" }, // Calculate total value for each group
-        },
-      },
-      {
-        $sort: { "_id.length": -1 }, // Sort by length descending to prioritize maximum length
-      },
-      {
-        $group: {
-          _id: "$_id.label",
-          maxLengthCategory: {
-            $push: {
-              maxLength: "$_id.length",
-              count: "$count",
-              value: "$_id.value",
-              totalValue: "$totalValue", // Add total value for percentage calculation
-            },
-          },
-          otherCategories: {
-            $push: {
-              maxLength: "$_id.length",
-              count: "$count",
-              value: "$_id.value",
-              totalValue: "$totalValue", // Add total value for percentage calculation
-            },
-          },
-          totalSum: { $sum: "$totalValue" }, // Calculate total sum of all numeric values
-        },
-      },
-      {
-        $addFields: {
-          // Separate the max length category from other categories
-          maxLengthCategory: {
-            $filter: {
-              input: "$otherCategories",
-              as: "other",
-              cond: {
-                $eq: [
-                  "$$other.maxLength",
-                  { $max: "$maxLengthCategory.maxLength" },
-                ],
+        {
+          $set: {
+            max_array: {
+              $filter: {
+                input: "$docs",
+                as: "item",
+                cond: {
+                  $eq: ["$$item.len", "$max_len"],
+                },
               },
             },
-          },
-          otherCategories: {
-            $filter: {
-              input: "$otherCategories",
-              as: "other",
-              cond: {
-                $ne: [
-                  "$$other.maxLength",
-                  { $max: "$maxLengthCategory.maxLength" },
-                ],
+            non_array: {
+              $filter: {
+                input: "$docs",
+                as: "item",
+                cond: {
+                  $lt: ["$$item.len", "$max_len"],
+                },
               },
             },
           },
         },
-      },
-      {
-        $unwind: "$maxLengthCategory",
-      },
-      {
-        $addFields: {
-          "maxLengthCategory.percentage": {
-            $cond: {
-              if: { $gt: ["$totalSum", 0] }, // Check if totalSum is greater than zero
-              then: {
-                $multiply: [
-                  { $divide: ["$maxLengthCategory.totalValue", "$totalSum"] },
-                  100,
-                ],
-              },
-              else: 0, // Set percentage to 0 if totalSum is zero
+        {
+          $addFields: {
+            non_max_total: {
+              $sum: `$non_array.${field2}`,
             },
           },
         },
-      },
-      {
-        $group: {
-          _id: "$_id",
-          categories: {
-            $push: {
-              label: "$_id",
-              maxLength: "$maxLengthCategory.maxLength",
-              count: "$maxLengthCategory.count",
-              maxValue: "$maxLengthCategory.value",
-              percentage: "$maxLengthCategory.percentage",
-            },
+        {
+          $unwind: {
+            path: "$max_array",
+            preserveNullAndEmptyArrays: true,
           },
-          others: { $first: "$otherCategories" },
-          totalSum: { $first: "$totalSum" },
         },
-      },
-      {
-        $project: {
-          _id: 0,
-          label: "$_id",
-          categories: {
-            $concatArrays: [
-              "$categories",
+        {
+          $addFields: {
+            other: [
               {
-                $cond: {
-                  if: { $gt: [{ $size: "$others" }, 0] },
-                  then: [
+                label: "other",
+                value: "$non_max_total",
+                percent: {
+                  $multiply: [
+                    100,
                     {
-                      label: "Others",
-                      maxLength: "Others",
-                      count: { $sum: "$others.count" },
-                      percentage: {
-                        $multiply: [
-                          {
-                            $divide: [
-                              { $sum: "$others.totalValue" },
-                              "$totalSum",
-                            ],
-                          },
-                          100,
-                        ],
-                      },
+                      $divide: ["$non_max_total", "$total"],
                     },
                   ],
-                  else: [],
                 },
               },
             ],
-          },
-        },
-      },
-      {
-        $unwind: "$categories",
-      },
-      {
-        $project: {
-          label: "$categories.label",
-          maxLength: "$categories.maxLength",
-          count: "$categories.count",
-          maxValue: "$categories.maxValue",
-          percentage: "$categories.percentage",
-        },
-      },
-      {
-        $group: {
-          _id: {
-            label: "$label",
-            maxLength: "$maxLength",
-            count: "$count",
-            maxValue: "$maxValue",
-            percentage: "$percentage",
-          },
-          repeated: {
-            $push: {
-              label: "$label",
-              maxLength: "$maxLength",
-              count: "$count",
-              maxValue: "$maxValue",
-              percentage: "$percentage",
+            max: {
+              label: `$max_array.${field1}`,
+              value: `$max_array.${field2}`,
+              percent: {
+                $multiply: [
+                  100,
+                  {
+                    $divide: [`$max_array.${field2}`, "$total"],
+                  },
+                ],
+              },
             },
           },
         },
-      },
-      {
-        $unwind: "$repeated",
-      },
-      {
-        $replaceRoot: { newRoot: "$repeated" },
-      },
-      {
-        $facet: {
-          data: [{ $match: {} }],
-          checkEmpty: [{ $count: "count" }],
+        {
+          $group: {
+            _id: null,
+            other: {
+              $first: "$other",
+            },
+            max: {
+              $push: "$max",
+            },
+          },
         },
-      },
-    ]);
+        {
+          $addFields: {
+            item: {
+              $concatArrays: ["$other", "$max"],
+            },
+          },
+        },
+        {
+          $unwind: {
+            path: "$item",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        {
+          $replaceRoot: {
+            newRoot: "$item",
+          },
+        },
+        // {
+        //   $match: {
+        //     value: {
+        //       $ne: 0,
+        //     },
+        //     percent: {
+        //       $ne: 0,
+        //     },
+        //   },
+        // },
+      ];
+    } else {
+      pipeline = [
+        {
+          $match: {
+            [field2]: {
+              $ne: null,
+            },
+          },
+        },
+        {
+          $set: {
+            count_string: {
+              $toString: `$${field2}`,
+            },
+          },
+        },
+        {
+          $set: {
+            count_string: {
+              $cond: {
+                if: { $eq: [`$${field2}`, true] },
+                then: "1",
+                else: "0",
+              },
+            },
+          },
+        },
+        {
+          $group: {
+            _id: "$count_string",
+            count_false: { $sum: 1 },
+            docs: { $push: "$$ROOT" },
+          },
+        },
+        {
+          $set: {
+            true_value: {
+              $filter: {
+                input: "$docs",
+                as: "item",
+                cond: { $eq: ["$$item.count_string", "1"] },
+              },
+            },
+            false_value: {
+              $cond: {
+                if: { $eq: ["$_id", "0"] },
+                then: "1",
+                else: "0",
+              },
+            },
+          },
+        },
+        {
+          $addFields: {
+            other: [
+              {
+                id: "$true_value._id",
+                label: "other",
+                value: "false",
+              },
+            ],
+            true_obj: {
+              id: "$true_value._id",
+              label: `$true_value.${field1}`,
+              value: `$true_value.${field2}`,
+            },
+          },
+        },
+        {
+          $match: {
+            _id: { $eq: "1" },
+          },
+        },
+        {
+          $unwind: {
+            path: "$true_obj.label",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$true_obj.value",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$true_obj.id",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            other: 1,
+            true_obj: 1,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            true_obj: {
+              $addToSet: {
+                id: "$true_obj.id",
+                label: "$true_obj.label",
+                value: "$true_obj.value",
+              },
+            },
+            false_obj: {
+              $first: "$other",
+            },
+          },
+        },
+        {
+          $set: {
+            true_obj: {
+              $concatArrays: ["$true_obj", "$false_obj"],
+            },
+          },
+        },
+        {
+          $unwind: {
+            path: "$true_obj",
+          },
+        },
+        {
+          $project: {
+            id: "$true_obj.id",
+            label: "$true_obj.label",
+            value: "$true_obj.value",
+            _id: 0,
+          },
+        },
+        {
+          $group: {
+            _id: "$id",
+            data: { $push: "$$ROOT" },
+          },
+        },
+        {
+          $project: {
+            label: { $first: "$data.label" },
+            value: { $first: "$data.value" },
+            _id: 0,
+          },
+        },
+      ];
+    }
+    // Perform aggregation
+    const response = await schemas[chartSource].aggregate(pipeline);
 
     console.log(response);
 
     res.send({
       status: 200,
       msg: "Request processed successfully",
-      data: response[0].data,
+      data: response,
     });
   } catch (err) {
     console.error("Error fetching data: ", err.message);

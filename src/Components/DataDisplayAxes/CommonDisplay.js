@@ -73,7 +73,7 @@ const DataDisplayComponent = ({
         });
         // console.log(measRes.data);
         setMeas(measRes.data);
-
+        console.log(keys);
         setDimensions(keys);
         setMeasures(measRes.data);
       } catch (error) {
